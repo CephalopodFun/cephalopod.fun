@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../styles.css">
+  <title>Banana Collector</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 2px solid black;
+      display: block;
+      margin: 0 auto;
+      touch-action: none; /* Prevents scrolling when touching the game */
+    }
+    .arrow-btn {
+      padding: 10px 20px;
+      margin: 20px;
+      font-size: 1.5rem;
+      background-color: lightgray;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .arrow-btn:active {
+      background-color: gray;
+    }
+  </style>
+</head>
+<body>
+  <h1>Banana Collector</h1>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <p>Use Left and Right Arrow Keys or Tap the Arrows to Move the Monkey!</p>
+  <div>
+    <button class="arrow-btn" id="leftBtn">←</button>
+    <button class="arrow-btn" id="rightBtn">→</button>
+  </div>
+  <a href="../index.html">Back to Lobby</a>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game variables
+    const monkey = { x: 180, y: 350, width: 40, height: 40 };
+    const banana = { x: Math.random() * 360, y: 0, width: 20, height: 20 };
+    let score = 0;
+
+    // Move the monkey (Keyboard controls)
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft' && monkey.x > 0) {
+        monkey.x -= 20;
+        document.getElementById("leftBtn").style.backgroundColor = 'gray'; // Make left button gray when pressed
+      }
+      if (event.key === 'ArrowRight' && monkey.x < 360) {
+        monkey.x += 20;
+        document.getElementById("rightBtn").style.backgroundColor = 'gray'; // Make right button gray when pressed
+      }
+    });
+
+    // Reset button color after release (for keyboard events)
+    document.addEventListener('keyup', (event) => {
+      if (event.key === 'ArrowLeft') {
+        document.getElementById("leftBtn").style.backgroundColor = 'lightgray'; // Reset left button
+      }
+      if (event.key === 'ArrowRight') {
+        document.getElementById("rightBtn").style.backgroundColor = 'lightgray'; // Reset right button
+      }
+    });
+
+    // Mobile controls (Arrow buttons)
+    document.getElementById("leftBtn").addEventListener('touchstart', () => {
+      monkey.x -= 20;
+      document.getElementById("leftBtn").style.backgroundColor = 'gray'; // Gray the button when pressed
+    });
+
+    document.getElementById("rightBtn").addEventListener('touchstart', () => {
+      monkey.x += 20;
+      document.getElementById("rightBtn").style.backgroundColor = 'gray'; // Gray the button when pressed
+    });
+
+    // Reset button color after release (for mobile events)
+    document.getElementById("leftBtn").addEventListener('touchend', () => {
+      document.getElementById("leftBtn").style.backgroundColor = 'lightgray'; // Reset left button
+    });
+
+    document.getElementById("rightBtn").addEventListener('touchend', () => {
+      document.getElementById("rightBtn").style.backgroundColor = 'lightgray'; // Reset right button
+    });
+
+    // Game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw monkey
+      ctx.fillStyle = 'brown';
+      ctx.fillRect(monkey.x, monkey.y, monkey.width, monkey.height);
+
+      // Draw banana
+      ctx.fillStyle = 'yellow';
+      ctx.fillRect(banana.x, banana.y, banana.width, banana.height);
+
+      // Move banana
+      banana.y += 5;
+
+      // Check for collision
+      if (
+        banana.y + banana.height >= monkey.y &&
+        banana.x + banana.width >= monkey.x &&
+        banana.x <= monkey.x + monkey.width
+      ) {
+        score++;
+        banana.y = 0;
+        banana.x = Math.random() * 360; // Reset banana position
+      }
+
+      // Reset banana if it falls off screen
+      if (banana.y > canvas.height) {
+        banana.y = 0;
+        banana.x = Math.random() * 360;
+      }
+
+      // Display score
+      ctx.fillStyle = 'black';
+      ctx.font = '20px Arial';
+      ctx.fillText(`Score: ${score}`, 10, 20);
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
+
