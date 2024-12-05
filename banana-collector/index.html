@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../styles.css">
+  <title>Banana Collector</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 2px solid black;
+      display: block;
+      margin: 0 auto;
+      touch-action: none; /* Prevents scrolling when touching the game */
+    }
+  </style>
+</head>
+<body>
+  <h1>Banana Collector</h1>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <p>Use Left and Right Arrow Keys or Drag to Move the Monkey!</p>
+  <a href="../index.html">Back to Lobby</a>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game variables
+    const monkey = { x: 180, y: 350, width: 40, height: 40 };
+    const banana = { x: Math.random() * 360, y: 0, width: 20, height: 20 };
+    let score = 0;
+    let touchX = null; // Tracks touch position for mobile
+
+    // Move the monkey (Keyboard controls)
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft' && monkey.x > 0) monkey.x -= 20;
+      if (event.key === 'ArrowRight' && monkey.x < 360) monkey.x += 20;
+    });
+
+    // Move the monkey (Touch controls)
+    canvas.addEventListener('touchstart', (event) => {
+      const touch = event.touches[0];
+      touchX = touch.clientX - canvas.offsetLeft;
+    });
+
+    canvas.addEventListener('touchmove', (event) => {
+      const touch = event.touches[0];
+      touchX = touch.clientX - canvas.offsetLeft;
+
+      // Update monkey position based on touch
+      monkey.x = touchX - monkey.width / 2;
+
+      // Clamp monkey position within canvas
+      if (monkey.x < 0) monkey.x = 0;
+      if (monkey.x > canvas.width - monkey.width) monkey.x = canvas.width - monkey.width;
+    });
+
+    canvas.addEventListener('touchend', () => {
+      touchX = null; // Stop tracking touch after touch ends
+    });
+
+    // Game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw monkey
+      ctx.fillStyle = 'brown';
+      ctx.fillRect(monkey.x, monkey.y, monkey.width, monkey.height);
+
+      // Draw banana
+      ctx.fillStyle = 'yellow';
+      ctx.fillRect(banana.x, banana.y, banana.width, banana.height);
+
+      // Move banana
+      banana.y += 5;
+
+      // Check for collision
+      if (
+        banana.y + banana.height >= monkey.y &&
+        banana.x + banana.width >= monkey.x &&
+        banana.x <= monkey.x + monkey.width
+      ) {
+        score++;
+        banana.y = 0;
+        banana.x = Math.random() * 360; // Reset banana position
+      }
+
+      // Reset banana if it falls off screen
+      if (banana.y > canvas.height) {
+        banana.y = 0;
+        banana.x = Math.random() * 360;
+      }
+
+      // Display score
+      ctx.fillStyle = 'black';
+      ctx.font = '20px Arial';
+      ctx.fillText(`Score: ${score}`, 10, 20);
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
+
