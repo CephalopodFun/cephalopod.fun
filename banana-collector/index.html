@@ -3,42 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../styles.css">
   <title>Banana Collector</title>
   <style>
     body {
-      text-align: center;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
       font-family: Arial, sans-serif;
     }
     canvas {
-      border: 2px solid black;
       display: block;
-      margin: 0 auto;
       touch-action: none; /* Prevents scrolling when touching the game */
+    }
+    .ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+    .ui img {
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+    }
+    .score {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    .instructions {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 16px;
+      color: black;
     }
   </style>
 </head>
 <body>
-  <h1>Banana Collector</h1>
-  <canvas id="gameCanvas" width="400" height="400"></canvas>
-  <p>Use Left and Right Arrow Keys or Drag to Move the Monkey!</p>
-  <a href="../index.html">Back to Lobby</a>
+  <div class="ui">
+    <img src="placeholder.png" alt="Back to Lobby" id="backButton">
+    <div class="score">Score: <span id="scoreDisplay">0</span></div>
+  </div>
+  <canvas id="gameCanvas"></canvas>
+  <div class="instructions">Use Left and Right Arrow Keys or Drag to Move the Monkey!</div>
 
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
+    // Resize canvas to fit the screen
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
     // Game variables
-    const monkey = { x: 180, y: 350, width: 40, height: 40 };
-    const banana = { x: Math.random() * 360, y: 0, width: 20, height: 20 };
+    const monkey = { x: canvas.width / 2 - 50, y: canvas.height - 100, width: 80, height: 80 };
+    const banana = { x: Math.random() * (canvas.width - 40), y: 0, width: 40, height: 40 };
     let score = 0;
     let touchX = null; // Tracks touch position for mobile
     let lastTouchX = monkey.x; // To store the last touch position to control speed
 
     // Move the monkey (Keyboard controls)
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'ArrowLeft' && monkey.x > 0) monkey.x -= 20;
-      if (event.key === 'ArrowRight' && monkey.x < 360) monkey.x += 20;
+      const step = 30; // Adjust movement speed
+      if (event.key === 'ArrowLeft' && monkey.x > 0) monkey.x -= step;
+      if (event.key === 'ArrowRight' && monkey.x < canvas.width - monkey.width) monkey.x += step;
     });
 
     // Move the monkey (Touch controls)
@@ -55,13 +88,12 @@
       // Calculate how much the touch has moved from the last position
       const deltaX = touchX - lastTouchX;
 
-      // Limit the movement speed (similar to key press movement)
-      const maxSpeed = 6; // Maximum allowed speed in pixels per movement
+      // Limit the movement speed (make the monkey move slower)
+      const maxSpeed = 5; // Slower movement
       if (Math.abs(deltaX) > maxSpeed) {
-        // If the movement speed exceeds the max speed, only move by maxSpeed
         monkey.x += (deltaX > 0 ? maxSpeed : -maxSpeed);
       } else {
-        monkey.x += deltaX; // Otherwise, move by the touch delta
+        monkey.x += deltaX;
       }
 
       // Clamp monkey position within canvas
@@ -73,6 +105,12 @@
 
     canvas.addEventListener('touchend', () => {
       touchX = null; // Stop tracking touch after touch ends
+    });
+
+    // Back to lobby button
+    const backButton = document.getElementById('backButton');
+    backButton.addEventListener('click', () => {
+      window.location.href = "../index.html"; // Update this to your lobby page
     });
 
     // Game loop
@@ -97,20 +135,16 @@
         banana.x <= monkey.x + monkey.width
       ) {
         score++;
+        document.getElementById('scoreDisplay').textContent = score;
         banana.y = 0;
-        banana.x = Math.random() * 360; // Reset banana position
+        banana.x = Math.random() * (canvas.width - banana.width); // Reset banana position
       }
 
       // Reset banana if it falls off screen
       if (banana.y > canvas.height) {
         banana.y = 0;
-        banana.x = Math.random() * 360;
+        banana.x = Math.random() * (canvas.width - banana.width);
       }
-
-      // Display score
-      ctx.fillStyle = 'black';
-      ctx.font = '20px Arial';
-      ctx.fillText(`Score: ${score}`, 10, 20);
 
       requestAnimationFrame(gameLoop);
     }
