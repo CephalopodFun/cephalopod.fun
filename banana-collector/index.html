@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banana Collector</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+    .ui {
+      position: absolute;
+      top: 35px;
+      left: 80px;
+    }
+    .ui img {
+      width: 100px;
+      height: 100px;
+      cursor: pointer;
+    }
+    .score {
+      font-size: 20px;
+      font-weight: bold;
+      position: absolute;
+      top: 40px;
+      right: 100px;
+    }
+    .instructions {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 16px;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="ui">
+    <img src="lobby.png" alt="Back to Lobby" id="backButton">
+  </div>
+  <div class="score">Score: <span id="scoreDisplay">0</span></div>
+  <canvas id="gameCanvas"></canvas>
+  <div class="instructions"></div>
+
+      <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Resize canvas to fit the screen
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const backgroundImage = new Image();
+    backgroundImage.src = 'background.png';
+
+    // Game variables
+    const monkey = {
+      x: canvas.width / 2 - 50,
+      y: canvas.height - 140,
+      width: 116.5,
+      height: 133.75,
+      image: new Image()
+    };
+    monkey.image.src = 'monkey.png'; // Path to the monkey image
+
+    const banana = {
+      x: Math.random() * (canvas.width - 80) + 40,
+      y: 0,
+      width: 70,
+      height: 70,
+      rotation: 0, // Rotation angle in radians
+      image: new Image()
+    };
+    banana.image.src = 'banana.png'; // Path to the yellow banana image
+
+    const greenBanana = {
+      x: Math.random() * (canvas.width - 80) + 40,
+      y: 0,
+      width: 70,
+      height: 70,
+      rotation: 0, // Rotation angle in radians
+      speed: 10, // Faster speed for the green banana
+      image: new Image()
+    };
+    greenBanana.image.src = 'green-banana.png'; // Path to the green banana image (replace with your image)
+
+    let score = 0;
+    let lastTouchX = null; // Store the last touch position
+    const maxSpeed = 7; // Maximum movement speed per touch event (pixels per frame)
+
+    // Move the monkey (Keyboard controls)
+    document.addEventListener('keydown', (event) => {
+      const step = 30;
+      if (event.key === 'ArrowLeft' && monkey.x > 0) monkey.x -= step;
+      if (event.key === 'ArrowRight' && monkey.x < canvas.width - monkey.width) monkey.x += step;
+    });
+
+    // Move the monkey (Touch controls)
+    canvas.addEventListener('touchstart', (event) => {
+      const touch = event.touches[0];
+      lastTouchX = touch.clientX; // Initialize lastTouchX when touch starts
+    });
+
+    canvas.addEventListener('touchmove', (event) => {
+      const touch = event.touches[0];
+
+      if (lastTouchX !== null) {
+        // Calculate the distance moved
+        let deltaX = touch.clientX - lastTouchX;
+
+        // Limit the movement to the maxSpeed
+        if (deltaX > maxSpeed) deltaX = maxSpeed;
+        if (deltaX < -maxSpeed) deltaX = -maxSpeed;
+
+        // Update monkey's position
+        monkey.x += deltaX;
+      }
+
+      // Update lastTouchX for the next event
+      lastTouchX = touch.clientX;
+
+      // Clamp monkey's position within canvas bounds
+      if (monkey.x < 0) monkey.x = 0;
+      if (monkey.x > canvas.width - monkey.width) monkey.x = canvas.width - monkey.width;
+    });
+
+    canvas.addEventListener('touchend', () => {
+      lastTouchX = null; // Reset when touch ends
+    });
+
+    // Back to lobby button
+    const backButton = document.getElementById('backButton');
+    backButton.addEventListener('click', () => {
+      window.location.href = "../index.html";
+    });
+
+    // Game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+      // Draw monkey image
+      ctx.drawImage(monkey.image, monkey.x, monkey.y, monkey.width, monkey.height);
+
+      // Move and draw yellow banana
+      banana.y += 5;
+      banana.rotation += 0.1; // Increment rotation angle
+      ctx.save();
+      ctx.translate(banana.x + banana.width / 2, banana.y + banana.height / 2);
+      ctx.rotate(banana.rotation);
+      ctx.drawImage(banana.image, -banana.width / 2, -banana.height / 2, banana.width, banana.height);
+      ctx.restore();
+
+      // Move and draw green banana
+      greenBanana.y += greenBanana.speed;
+      greenBanana.rotation += 0.15; // Increment rotation angle faster for green banana
+      ctx.save();
+      ctx.translate(greenBanana.x + greenBanana.width / 2, greenBanana.y + greenBanana.height / 2);
+      ctx.rotate(greenBanana.rotation);
+      ctx.drawImage(greenBanana.image, -greenBanana.width / 2, -greenBanana.height / 2, greenBanana.width, greenBanana.height);
+      ctx.restore();
+
+      // Check for collision with yellow banana
+      if (
+        banana.y + banana.height >= monkey.y &&
+        banana.x + banana.width >= monkey.x &&
+        banana.x <= monkey.x + monkey.width
+      ) {
+        score++;
+        document.getElementById('scoreDisplay').textContent = score;
+        banana.y = 0;
+        banana.x = Math.random() * (canvas.width - 80) + 40;
+        banana.rotation = 0;
+      }
+
+      // Check for collision with green banana
+      if (
+        greenBanana.y + greenBanana.height >= monkey.y &&
+        greenBanana.x + greenBanana.width >= monkey.x &&
+        greenBanana.x <= monkey.x + monkey.width
+      ) {
+        score += 2; // Add 2 points for green banana
+        document.getElementById('scoreDisplay').textContent = score;
+        greenBanana.y = 0;
+        greenBanana.x = Math.random() * (canvas.width - 80) + 40;
+        greenBanana.rotation = 0;
+      }
+
+      // Reset yellow banana if it falls off screen
+      if (banana.y > canvas.height) {
+        banana.y = 0;
+        banana.x = Math.random() * (canvas.width - 80) + 40;
+        banana.rotation = 0;
+      }
+
+      // Reset green banana if it falls off screen
+      if (greenBanana.y > canvas.height) {
+        greenBanana.y = 0;
+        greenBanana.x = Math.random() * (canvas.width - 80) + 40;
+        greenBanana.rotation = 0;
+      }
+
+      requestAnimationFrame(gameLoop); // Keep the game loop running
+    }
+
+    backgroundImage.onload = gameLoop; 
+  </script>
+
+
+</body>
+</html>
+
+
+
+
