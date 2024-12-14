@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Welcome to Cephalopod.fun! Play fun games, have fun.">
+  <meta name="keywords" content="cephalopod, cephalopod fun, interactive projects, games, web games, fun">
+  
+  <link rel="icon" href="favicon.ico">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Yuji+Mai&display=swap" rel="stylesheet">
+
+  <title>Cephalopod.fun</title>
+  
+  <style>
+    h1 {
+      font-family: 'Yuji Mai', sans-serif;
+      text-align: center;
+      font-size: 4rem;
+    }
+    
+    a {
+      text-decoration: none;
+    }
+
+    /* Center the image by the parent container, not by the image itself */
+    .games-list {
+      text-align: center;
+    }
+    
+
+    .games-list a {
+      display: inline-block;
+    }
+    
+    .game-image {
+      width: 300px; 
+      cursor: pointer; 
+      transition: transform 0.2s ease; 
+      /* Removed display:block; and margin:0 auto; */
+    }
+
+    .game-image:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Cephalopod.fun</h1>
+   
+  <div class="games-list">
+    <a href="/banana-collector/" title="Play Banana Collector">
+      <img src="banana-collector/banana-collector.png" alt="Banana Collector" class="game-image">
+    </a>
+  </div>
+  
+</body>
+</html>
