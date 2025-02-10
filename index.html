@@ -11,51 +11,84 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Yuji+Mai&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Darumadrop+One&display=swap" rel="stylesheet">
 
   <title>Cephalopod.fun</title>
   
   <style>
-    h1 {
-      font-family: 'Yuji Mai', sans-serif;
-      text-align: center;
-      font-size: 4rem;
-    }
-    
-    a {
-      text-decoration: none;
+    body {
+      text-align: center; 
     }
 
-    /* Center the image by the parent container, not by the image itself */
+    h1 {
+      font-family: 'Yuji Mai', sans-serif;
+      font-size: 4rem;
+      margin-bottom: -5px; 
+    }
+
+    .subtitle {
+      font-family: 'Darumadrop One', sans-serif;
+      font-size: 25px;
+      font-weight: 300; 
+      letter-spacing: 0.5px;
+      color: #777; 
+      margin-top: -10px;
+      margin-bottom: 45px;
+    }
+
     .games-list {
       text-align: center;
     }
-    
 
-    .games-list a {
-      display: inline-block;
-    }
-    
     .game-image {
       width: 300px; 
       cursor: pointer; 
-      transition: transform 0.2s ease; 
-      /* Removed display:block; and margin:0 auto; */
+      transition: transform 0.2s ease;
     }
 
     .game-image:hover {
       transform: scale(1.1);
     }
+
+   @media (max-width: 768px) { /* For tablets and smaller screens */
+    h1 {
+      font-size: 3rem; /* Reduce title size */
+    }
+    .subtitle {
+      font-size: 18px; /* Make subtitle smaller */
+    }
+    .game-image {
+      width: 80%; /* Make images scale with screen */
+      max-width: 250px; /* Limit max size */
+    }
+  }
+
+  @media (max-width: 480px) { /* For small phones */
+    h1 {
+      font-size: 2.5rem; /* Further reduce title */
+    }
+    .subtitle {
+      font-size: 16px; /* Keep it readable */
+    }
+    .game-image {
+      width: 90%; /* Scale image dynamically */
+      max-width: 200px; /* Make it smaller for tiny screens */
+    }
+  }
+
   </style>
 </head>
 <body>
   <h1>Cephalopod.fun</h1>
-   
+  <p class="subtitle">play games and have fun</p>
+
   <div class="games-list">
     <a href="/banana-collector/" title="Play Banana Collector">
       <img src="banana-collector/banana-collector.png" alt="Banana Collector" class="game-image">
     </a>
   </div>
-  
 </body>
 </html>
