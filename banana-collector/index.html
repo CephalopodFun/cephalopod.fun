@@ -399,13 +399,16 @@
     </div>
   
     <div id="shopButtonsContainer">
-     
       <button class="shop-button" id="doubleYellowSpeedBtn">
         2x Yellow Banana (1500 Coins)
       </button>
      
       <button class="shop-button" id="upgradeBananaBtn">
         Bigger Bananas (5000 Coins)
+      </button>
+      
+      <button class="shop-button" id="blackBananaBtn">
+        Black Banana (10000 Coins)
       </button>
     </div>
   </div>
@@ -553,6 +556,7 @@
     const bananaRespawnDelay = 100;
     const greenBananaRespawnDelay = 1000;
     const redBananaRespawnDelay = 5000;
+    const blackBananaRespawnDelay = 7000;
     const banana2RespawnDelay = 450;  
 
     document.addEventListener('keydown', (event) => {
@@ -598,9 +602,24 @@
       }, delay);
     }
 
-   
+    // Purchase keys (already in use)
     const doubleUpgradeStorKey = 'd0ub13Y3ll0wUpgr4d3Key123' + 'Obfuscate987';
+    const upgradeStorKey = 'upgr4d3B4n4n45' + 's3cur3K3y987';
+    const blackBananaStorKey = 'bl4ckB4n4n4S3cur3K3y' + 'Obfuscate987';
+
+    // New active state keys
+    const doubleUpgradeActiveStorKey = 'd0ub13Y3ll0wUpgr4d3ActiveKey123' + 'Obfuscate987';
+    const upgradeActiveStorKey = 'upgr4d3B4n4n45Active' + 's3cur3K3y987';
+    const blackBananaActiveStorKey = 'bl4ckB4n4n4ActiveS3cur3K3y';
+
     let isDoubleUpgradePurchased = false;
+    let isUpgradePurchased = false;
+    let isBlackBananaPurchased = false;
+    let isDoubleUpgradeActive = false;
+    let isUpgradeActive = false;
+    let isBlackBananaActive = false;
+
+    // Load purchase states from local storage
     const doubleUpgradeStoredVal = localStorage.getItem(doubleUpgradeStorKey);
     if (doubleUpgradeStoredVal) {
       try {
@@ -609,9 +628,61 @@
         isDoubleUpgradePurchased = false;
       }
     }
-   
-    let banana2 = null;
+    const upgradeStoredVal = localStorage.getItem(upgradeStorKey);
+    if (upgradeStoredVal) {
+      try {
+        isUpgradePurchased = (atob(upgradeStoredVal) === "1");
+      } catch(e) {
+        isUpgradePurchased = false;
+      }
+    }
+    const blackBananaStoredVal = localStorage.getItem(blackBananaStorKey);
+    if (blackBananaStoredVal) {
+      try {
+        isBlackBananaPurchased = (atob(blackBananaStoredVal) === "1");
+      } catch(e) {
+        isBlackBananaPurchased = false;
+      }
+    }
+
+    // Load active states (default true upon purchase)
     if (isDoubleUpgradePurchased) {
+      const storedActive = localStorage.getItem(doubleUpgradeActiveStorKey);
+      if (storedActive) {
+        try {
+          isDoubleUpgradeActive = (atob(storedActive) === "1");
+        } catch(e) { isDoubleUpgradeActive = true; }
+      } else {
+        isDoubleUpgradeActive = true;
+        localStorage.setItem(doubleUpgradeActiveStorKey, btoa("1"));
+      }
+    }
+    if (isUpgradePurchased) {
+      const storedActive = localStorage.getItem(upgradeActiveStorKey);
+      if (storedActive) {
+        try {
+          isUpgradeActive = (atob(storedActive) === "1");
+        } catch(e) { isUpgradeActive = true; }
+      } else {
+        isUpgradeActive = true;
+        localStorage.setItem(upgradeActiveStorKey, btoa("1"));
+      }
+    }
+    if (isBlackBananaPurchased) {
+      const storedActive = localStorage.getItem(blackBananaActiveStorKey);
+      if (storedActive) {
+        try {
+          isBlackBananaActive = (atob(storedActive) === "1");
+        } catch(e) { isBlackBananaActive = true; }
+      } else {
+        isBlackBananaActive = true;
+        localStorage.setItem(blackBananaActiveStorKey, btoa("1"));
+      }
+    }
+
+    // Global objects for upgrades
+    let banana2 = null;
+    if (isDoubleUpgradePurchased && isDoubleUpgradeActive) {
       banana2 = {
         x: Math.random() * (canvas.width - 80) + 40,
         y: 0,
@@ -622,7 +693,92 @@
       };
       banana2.image.src = 'banana2.png';
     }
-   
+    let blackBanana = null;
+    if (isBlackBananaPurchased && isBlackBananaActive) {
+      blackBanana = {
+        x: Math.random() * (canvas.width - 80) + 40,
+        y: 0,
+        width: baseBananaSize,
+        height: baseBananaSize,
+        rotation: 0,
+        speed: 2,
+        image: new Image()
+      };
+      blackBanana.image.src = 'black-banana.png';
+    }
+
+    // Update banana sizes based on upgrade active state
+    function updateBananaSizes() {
+      if (isUpgradeActive) {
+        banana.width = baseBananaSize * 1.2;
+        banana.height = baseBananaSize * 1.2;
+        greenBanana.width = baseBananaSize * 1.2;
+        greenBanana.height = baseBananaSize * 1.2;
+        redBanana.width = baseBananaSize * 1.2;
+        redBanana.height = baseBananaSize * 1.2;
+        if (banana2) {
+          banana2.width = baseBananaSize * 1.2;
+          banana2.height = baseBananaSize * 1.2;
+        }
+        if (blackBanana) {
+          blackBanana.width = baseBananaSize * 1.2;
+          blackBanana.height = baseBananaSize * 1.2;
+        }
+      } else {
+        banana.width = baseBananaSize;
+        banana.height = baseBananaSize;
+        greenBanana.width = baseBananaSize;
+        greenBanana.height = baseBananaSize;
+        redBanana.width = baseBananaSize;
+        redBanana.height = baseBananaSize;
+        if (banana2) {
+          banana2.width = baseBananaSize;
+          banana2.height = baseBananaSize;
+        }
+        if (blackBanana) {
+          blackBanana.width = baseBananaSize;
+          blackBanana.height = baseBananaSize;
+        }
+      }
+    }
+
+    window.addEventListener('load', () => {
+      // Update UI for upgrade buttons based on active states.
+      const doubleYellowSpeedBtn = document.getElementById('doubleYellowSpeedBtn');
+      const upgradeBananaBtn = document.getElementById('upgradeBananaBtn');
+      const blackBananaBtn = document.getElementById('blackBananaBtn');
+      if (isDoubleUpgradePurchased) {
+        doubleYellowSpeedBtn.innerHTML = "&#10004;";
+        doubleYellowSpeedBtn.style.backgroundColor = "#a0e18a";
+        if (isDoubleUpgradeActive) {
+          doubleYellowSpeedBtn.style.outline = "5px solid rgba(160,225,138,0.7)";
+          doubleYellowSpeedBtn.style.outlineOffset = "5px";
+        } else {
+          doubleYellowSpeedBtn.style.outline = "none";
+        }
+      }
+      if (isUpgradePurchased) {
+        upgradeBananaBtn.innerHTML = "&#10004;";
+        upgradeBananaBtn.style.backgroundColor = "#a0e18a";
+        if (isUpgradeActive) {
+          upgradeBananaBtn.style.outline = "5px solid rgba(160,225,138,0.7)";
+          upgradeBananaBtn.style.outlineOffset = "5px";
+        } else {
+          upgradeBananaBtn.style.outline = "none";
+        }
+        updateBananaSizes();
+      }
+      if (isBlackBananaPurchased) {
+        blackBananaBtn.innerHTML = "&#10004;";
+        blackBananaBtn.style.backgroundColor = "#a0e18a";
+        if (isBlackBananaActive) {
+          blackBananaBtn.style.outline = "5px solid rgba(160,225,138,0.7)";
+          blackBananaBtn.style.outlineOffset = "5px";
+        } else {
+          blackBananaBtn.style.outline = "none";
+        }
+      }
+    });
 
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -659,6 +815,38 @@
           ctx.rotate(redBanana.rotation);
           ctx.drawImage(redBanana.image, -redBanana.width / 2, -redBanana.height / 2, redBanana.width, redBanana.height);
           ctx.restore();
+        }
+
+        if (blackBanana && isBlackBananaActive) {
+          if (blackBanana.y > 0 || blackBanana.y < canvas.height) {
+            blackBanana.y += blackBanana.speed;
+            blackBanana.rotation += 0.05;
+            ctx.save();
+            ctx.translate(blackBanana.x + blackBanana.width / 2, blackBanana.y + blackBanana.height / 2);
+            ctx.rotate(blackBanana.rotation);
+            ctx.drawImage(blackBanana.image, -blackBanana.width / 2, -blackBanana.height / 2, blackBanana.width, blackBanana.height);
+            ctx.restore();
+          }
+          if (
+            blackBanana.y + blackBanana.height >= monkey.y &&
+            blackBanana.x + blackBanana.width >= monkey.x &&
+            blackBanana.x <= monkey.x + monkey.width
+          ) {
+            score -= 15;
+            document.getElementById('scoreDisplay').textContent = score;
+            saveLocalScore(score);
+            scoreRef.once('value').then((snapshot) => {
+              let globalScore = snapshot.val();
+              scoreRef.set(globalScore - 15);
+            });
+            showFloatingText(blackBanana.x + blackBanana.width / 2, blackBanana.y + blackBanana.height / 2, "-15");
+            blackBanana.y = -9999;
+            respawnBananaObj(blackBanana, blackBananaRespawnDelay);
+          }
+          if (blackBanana.y > canvas.height) {
+            blackBanana.y = -9999;
+            respawnBananaObj(blackBanana, blackBananaRespawnDelay);
+          }
         }
 
         // Collision detection for banana
@@ -728,10 +916,10 @@
           respawnBananaObj(redBanana, redBananaRespawnDelay);
         }
 
-        // ----- New code for banana2 (Doubled Yellow Banana Speed upgrade) -----
-        if (banana2) {
+        // ----- Double upgrade: banana2 only drawn if active -----
+        if (banana2 && isDoubleUpgradeActive) {
           if (banana2.y > 0 || banana2.y < canvas.height) {
-            banana2.y += 5;  // Same speed as banana
+            banana2.y += 5;
             banana2.rotation += 0.1;
             ctx.save();
             ctx.translate(banana2.x + banana2.width / 2, banana2.y + banana2.height / 2);
@@ -760,7 +948,7 @@
             respawnBananaObj(banana2, banana2RespawnDelay);
           }
         }
-        // ----- End of new banana2 code -----
+        // ----- End of banana2 code -----
       }
       requestAnimationFrame(gameLoop);
     }
@@ -772,7 +960,6 @@
       gameLoop();
     };
 
-    // Existing obfuscated coin storage key
     const storKey = 'zrtakdKA14spjaf7859ofayfalkaguensjJFAFk195481jaTjafI2841' +
                     '19585JDQKAKFKAKFAKFKAKFKA9GKAIOVNANEOGJAOARJJT1945' +
                     '1581JFAOOGAKGIT1150159159159KFAKGJ9159158JFKA9667814';
@@ -797,56 +984,162 @@
     initializeCoinScore();
     document.getElementById('overlayCoinCount').textContent = overlayCoinCount.toString();
 
-    
-    const upgradeStorKey = 'upgr4d3B4n4n45' + 's3cur3K3y987';
-    let isUpgradePurchased = false;
-    const upgradeStoredVal = localStorage.getItem(upgradeStorKey);
-    if (upgradeStoredVal) {
-      try {
-        isUpgradePurchased = (atob(upgradeStoredVal) === "1");
-      } catch(e) {
-        isUpgradePurchased = false;
-      }
-    }
+    // Upgrade button event listeners with toggle functionality
 
-    
-    window.addEventListener('load', () => {
-      if (isDoubleUpgradePurchased) {
-        const doubleYellowSpeedBtn = document.getElementById('doubleYellowSpeedBtn');
-        doubleYellowSpeedBtn.innerHTML = "&#10004;";
-        doubleYellowSpeedBtn.style.backgroundColor = "#a0e18a";
-        doubleYellowSpeedBtn.disabled = true;
-      }
-      if (isUpgradePurchased) {
-        const upgradeBananaBtn = document.getElementById('upgradeBananaBtn');
-        upgradeBananaBtn.innerHTML = "&#10004;";
-        upgradeBananaBtn.style.backgroundColor = "#a0e18a";
-        upgradeBananaBtn.disabled = true;
+    const doubleYellowSpeedBtn = document.getElementById('doubleYellowSpeedBtn');
+    doubleYellowSpeedBtn.addEventListener('click', () => {
+      if (!isDoubleUpgradePurchased) {
+        if (overlayCoinCount >= 1500) {  
+          overlayCoinCount -= 1500;
+          updateCoinScore();
+          localStorage.setItem(storKey, btoa(overlayCoinCount.toString()));
+          isDoubleUpgradePurchased = true;
+          localStorage.setItem(doubleUpgradeStorKey, btoa("1"));
+          // Default active state is true upon purchase.
+          isDoubleUpgradeActive = true;
+          localStorage.setItem(doubleUpgradeActiveStorKey, btoa("1"));
+          doubleYellowSpeedBtn.innerHTML = "&#10004;";
+          doubleYellowSpeedBtn.style.backgroundColor = "#a0e18a";
+          doubleYellowSpeedBtn.style.outline = "5px solid rgba(160,225,138,0.7)";
+          doubleYellowSpeedBtn.style.outlineOffset = "5px";
+          banana2 = {
+            x: Math.random() * (canvas.width - 80) + 40,
+            y: 0,
+            width: baseBananaSize,
+            height: baseBananaSize,
+            rotation: 0,
+            image: new Image()
+          };
+          banana2.image.src = 'banana2.png';
+        } else {
+          alert("Not enough coins! You need 1500 coins.");
+        }
+      } else {
+        // Toggle active state
+        if (isDoubleUpgradeActive) {
+          isDoubleUpgradeActive = false;
+          localStorage.setItem(doubleUpgradeActiveStorKey, btoa("0"));
+          doubleYellowSpeedBtn.style.outline = "none";
+        } else {
+          isDoubleUpgradeActive = true;
+          localStorage.setItem(doubleUpgradeActiveStorKey, btoa("1"));
+          doubleYellowSpeedBtn.style.outline = "5px solid rgba(160,225,138,0.7)";
+          doubleYellowSpeedBtn.style.outlineOffset = "5px";
+          if (!banana2) {
+            banana2 = {
+              x: Math.random() * (canvas.width - 80) + 40,
+              y: 0,
+              width: baseBananaSize,
+              height: baseBananaSize,
+              rotation: 0,
+              image: new Image()
+            };
+            banana2.image.src = 'banana2.png';
+          }
+        }
       }
     });
 
-    
-    if (isUpgradePurchased) {
-     
-      banana.width = baseBananaSize * 1.2;
-      banana.height = baseBananaSize * 1.2;
-      greenBanana.width = baseBananaSize * 1.2;
-      greenBanana.height = baseBananaSize * 1.2;
-      redBanana.width = baseBananaSize * 1.2;
-      redBanana.height = baseBananaSize * 1.2;
-     
-      if (banana2) {
-        banana2.width = baseBananaSize * 1.2;
-        banana2.height = baseBananaSize * 1.2;
+    const upgradeBananaBtn = document.getElementById('upgradeBananaBtn');
+    upgradeBananaBtn.addEventListener('click', () => {
+      if (!isUpgradePurchased) {
+        if (overlayCoinCount >= 5000) {  
+          overlayCoinCount -= 5000;
+          updateCoinScore();
+          localStorage.setItem(storKey, btoa(overlayCoinCount.toString()));
+         
+          isUpgradePurchased = true;
+          localStorage.setItem(upgradeStorKey, btoa("1"));
+          // Default active state true on purchase
+          isUpgradeActive = true;
+          localStorage.setItem(upgradeActiveStorKey, btoa("1"));
+          updateBananaSizes();
+          upgradeBananaBtn.innerHTML = "&#10004;";
+          upgradeBananaBtn.style.backgroundColor = "#a0e18a";
+          upgradeBananaBtn.style.outline = "5px solid rgba(160,225,138,0.7)";
+          upgradeBananaBtn.style.outlineOffset = "5px";
+        } else {
+          alert("Not enough coins! You need 5000 coins.");
+        }
+      } else {
+        if (isUpgradeActive) {
+          isUpgradeActive = false;
+          localStorage.setItem(upgradeActiveStorKey, btoa("0"));
+          upgradeBananaBtn.style.outline = "none";
+          updateBananaSizes();
+        } else {
+          isUpgradeActive = true;
+          localStorage.setItem(upgradeActiveStorKey, btoa("1"));
+          upgradeBananaBtn.style.outline = "5px solid rgba(160,225,138,0.7)";
+          upgradeBananaBtn.style.outlineOffset = "5px";
+          updateBananaSizes();
+        }
       }
-      
-      const upgradeBananaBtn = document.getElementById('upgradeBananaBtn');
-      upgradeBananaBtn.innerHTML = "&#10004;";
-      upgradeBananaBtn.style.backgroundColor = "#a0e18a";
-      upgradeBananaBtn.disabled = true;
-    }
+    });
 
-   
+    const blackBananaBtn = document.getElementById('blackBananaBtn');
+    blackBananaBtn.addEventListener('click', () => {
+      if (!isBlackBananaPurchased) {
+        if (overlayCoinCount >= 10000) {
+          overlayCoinCount -= 10000;
+          updateCoinScore();
+          localStorage.setItem(storKey, btoa(overlayCoinCount.toString()));
+          isBlackBananaPurchased = true;
+          localStorage.setItem(blackBananaStorKey, btoa("1"));
+          // Default active true on purchase.
+          isBlackBananaActive = true;
+          localStorage.setItem(blackBananaActiveStorKey, btoa("1"));
+          blackBananaBtn.innerHTML = "&#10004;";
+          blackBananaBtn.style.backgroundColor = "#a0e18a";
+          blackBananaBtn.style.outline = "5px solid rgba(160,225,138,0.7)";
+          blackBananaBtn.style.outlineOffset = "5px";
+          blackBanana = {
+            x: Math.random() * (canvas.width - 80) + 40,
+            y: 0,
+            width: baseBananaSize,
+            height: baseBananaSize,
+            rotation: 0,
+            speed: 2,
+            image: new Image()
+          };
+          blackBanana.image.src = 'black-banana.png';
+          if (isUpgradeActive) {
+            blackBanana.width = baseBananaSize * 1.2;
+            blackBanana.height = baseBananaSize * 1.2;
+          }
+        } else {
+          alert("Not enough coins! You need 10000 coins.");
+        }
+      } else {
+        if (isBlackBananaActive) {
+          isBlackBananaActive = false;
+          localStorage.setItem(blackBananaActiveStorKey, btoa("0"));
+          blackBananaBtn.style.outline = "none";
+        } else {
+          isBlackBananaActive = true;
+          localStorage.setItem(blackBananaActiveStorKey, btoa("1"));
+          blackBananaBtn.style.outline = "5px solid rgba(160,225,138,0.7)";
+          blackBananaBtn.style.outlineOffset = "5px";
+          if (!blackBanana) {
+            blackBanana = {
+              x: Math.random() * (canvas.width - 80) + 40,
+              y: 0,
+              width: baseBananaSize,
+              height: baseBananaSize,
+              rotation: 0,
+              speed: 2,
+              image: new Image()
+            };
+            blackBanana.image.src = 'black-banana.png';
+            if (isUpgradeActive) {
+              blackBanana.width = baseBananaSize * 1.2;
+              blackBanana.height = baseBananaSize * 1.2;
+            }
+          }
+        }
+      }
+    });
+    
     const magicBall = document.getElementById('magicBall');
     magicBall.addEventListener('mousedown', () => {
       magicBall.style.transform = 'translate(-50%, -50%) scale(1.2)';
@@ -919,68 +1212,6 @@
     backButton2.addEventListener('click', () => {
       shopOverlay.style.display = 'none';
       document.getElementById('magicBallOverlay').style.display = 'block';
-    });
-
-    
-    const doubleYellowSpeedBtn = document.getElementById('doubleYellowSpeedBtn');
-    doubleYellowSpeedBtn.addEventListener('click', () => {
-     
-      if (!isDoubleUpgradePurchased) {
-        if (overlayCoinCount >= 1500) {  
-          overlayCoinCount -= 1500;
-          updateCoinScore();
-          localStorage.setItem(storKey, btoa(overlayCoinCount.toString()));
-          isDoubleUpgradePurchased = true;
-          localStorage.setItem(doubleUpgradeStorKey, btoa("1"));
-          doubleYellowSpeedBtn.innerHTML = "&#10004;";
-          doubleYellowSpeedBtn.style.backgroundColor = "#a0e18a";
-          doubleYellowSpeedBtn.disabled = true;
-          
-          banana2 = {
-            x: Math.random() * (canvas.width - 80) + 40,
-            y: 0,
-            width: baseBananaSize,
-            height: baseBananaSize,
-            rotation: 0,
-            image: new Image()
-          };
-          banana2.image.src = 'banana2.png';
-        } else {
-          alert("Not enough coins! You need 1500 coins.");
-        }
-      }
-    });
-
-    
-    const upgradeBananaBtn = document.getElementById('upgradeBananaBtn');
-    upgradeBananaBtn.addEventListener('click', () => {
-      
-      if (!isUpgradePurchased) {
-        if (overlayCoinCount >= 5000) {  
-          overlayCoinCount -= 5000;
-          updateCoinScore();
-          localStorage.setItem(storKey, btoa(overlayCoinCount.toString()));
-         
-          banana.width = baseBananaSize * 1.2;
-          banana.height = baseBananaSize * 1.2;
-          greenBanana.width = baseBananaSize * 1.2;
-          greenBanana.height = baseBananaSize * 1.2;
-          redBanana.width = baseBananaSize * 1.2;
-          redBanana.height = baseBananaSize * 1.2;
-         
-          if (banana2) {
-            banana2.width = baseBananaSize * 1.2;
-            banana2.height = baseBananaSize * 1.2;
-          }
-          isUpgradePurchased = true;
-          localStorage.setItem(upgradeStorKey, btoa("1"));
-          upgradeBananaBtn.innerHTML = "&#10004;";
-          upgradeBananaBtn.style.backgroundColor = "#a0e18a";
-          upgradeBananaBtn.disabled = true;
-        } else {
-          alert("Not enough coins! You need 5000 coins.");
-        }
-      }
     });
   </script>
 </body>
